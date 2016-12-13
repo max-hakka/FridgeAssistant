@@ -1,0 +1,8 @@
+<package name="fridge">
+	<run>
+		<command name="fridge" class="iristk.app.fridge.FridgeSystem"/>
+	</run>
+	<classpath>
+		<src path="src" output="bin"/>
+	</classpath>
+</package>

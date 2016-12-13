@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<flow name="FridgeFlow" package="iristk.app.fridge" 
+	initial="Start"	xmlns="iristk.flow" xmlns:p="iristk.flow.param" xmlns:dialog="iristk.flow.DialogFlow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="iristk.flow flow.xsd iristk.flow.DialogFlow DialogFlow.xsd">
+	
+	<var name="cookBook" type="CookBook" />
+	<var name="fridge" type="Fridge" />
+	<var name="recipe" type="Recipe" />
+	
+	<state id="Start">
+		<onentry>
+			<exec>cookBook = CookBook.factory()</exec>
+			<exec>fridge = Fridge.factory()</exec>
+			<random>
+				<dialog:say>HUNGRY, are we?</dialog:say>
+				<dialog:say>Your wish is my command.</dialog:say>
+				<dialog:say>Apple and pears, speak to my ears.</dialog:say>
+				<dialog:say>What's cooking good looking?</dialog:say>
+				<dialog:say>What can I do you for?</dialog:say>
+			</random>
+			<goto state="Dispatch"/>
+		</onentry>
+	</state>
+	
+	<state id="Dispatch">
+		<onentry>
+			<dialog:listen/>
+		</onentry>
+		<onevent name="sense.user.speak">
+			<if cond="asInteger(event:sem:cook)==1">
+				<dialog:say>Okay.</dialog:say>
+				<goto state="Cook"/>
+			<else/>
+				<dialog:say>That was too low, let's try again.</dialog:say>
+				<reentry/>
+			</if>
+		</onevent>
+	</state>
+	
+	<state id="Cook">
+		<onentry>
+			<dialog:say>What do you want to cook?</dialog:say>
+			<dialog:listen context="'default recipes'" />
+		</onentry>
+		<onevent name="sense.user.speak">
+			<if cond="event?:sem:recipe">
+				<dialog:say>Found it!</dialog:say>
+				<exec>recipe = cookBook.lookup(event:sem:recipe)</exec>
+				<goto state="CheckIngredients" />
+			<else/>
+				<dialog:say>I can't find that. Please try again</dialog:say>
+				<goto state="Cook"/>
+			</if>
+		</onevent>
+	</state>
+	
+	<state id="CheckIngredients">
+		<onentry>
+			<if cond="fridge.canCook(recipe).isEmpty()">
+				<dialog:say>You can cook this recipe: <expr>recipe.getName()</expr></dialog:say>
+			<else/>
+				<dialog:say>No banana, janne, you cannot cook this recipe: <expr>recipe.getName()</expr></dialog:say>
+			</if>
+		</onentry>
+	</state>
+</flow>
