@@ -50,7 +50,7 @@ public class FridgeSystem {
 
 		// Load recipe grammar in order to recognize the name of a specific recipe.
 		system.loadContext("recipes", new SpeechGrammarContext(CookBook.factory().getGrammar()));
-		System.out.println(CookBook.factory().getGrammar());
+		system.loadContext("ingredients", new SpeechGrammarContext(Ingredient.getGrammar()));
 
 		system.setDefaultContext("default");
 

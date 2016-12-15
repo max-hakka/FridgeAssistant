@@ -3,14 +3,15 @@
 	initial="Start"	xmlns="iristk.flow" xmlns:p="iristk.flow.param" xmlns:dialog="iristk.flow.DialogFlow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="iristk.flow flow.xsd iristk.flow.DialogFlow DialogFlow.xsd">
 	
-	<var name="cookBook" type="CookBook" />
-	<var name="fridge" type="Fridge" />
-	<var name="recipe" type="Recipe" />
-	
+	<var name="cookBook" type="CookBook" value="CookBook.factory()" />
+	<var name="fridge" type="Fridge" value="Fridge.factory()" />
+	<var name="missingIngredients" type="List&lt;Ingredient&gt;" />
+	<var name="availableIngredients" type="List&lt;Ingredient&gt;" value="Ingredient.factory()" />
+	<var name="availableRecipes" type="List&lt;Recipe&gt;" />
+	<var name="recipe" type="Recipe" />	
+
 	<state id="Start">
 		<onentry>
-			<exec>cookBook = CookBook.factory()</exec>
-			<exec>fridge = Fridge.factory()</exec>
 			<random>
 				<dialog:say>HUNGRY, are we?</dialog:say>
 				<dialog:say>Your wish is my command.</dialog:say>
@@ -24,14 +25,83 @@
 	
 	<state id="Dispatch">
 		<onentry>
-			<dialog:listen/>
+			<dialog:listen />
+		</onentry>
+		<onevent name="sense.user.speak" cond="event?:sem:cook">
+			<dialog:say>Okay.</dialog:say>
+			<goto state="Cook"/>
+		</onevent>
+		<onevent name="sense.user.speak" cond="event?:sem:suggest">
+			<dialog:say>Alright, let's see what we have.</dialog:say>
+			<goto state="Suggestion"/>
+		</onevent>
+		<onevent name="sense.user.speak" cond="event?:sem:groceries">
+			<dialog:say>Okay.</dialog:say>
+			<goto state="Groceries"/>
+		</onevent>
+		<onevent name="sense.user.silence sense.user.speak">
+			<dialog:say>I don't understand you. Please repeat.</dialog:say>
+			<goto state="Dispatch"/>
+		</onevent>
+	</state>
+	
+	<state id="Groceries">
+		<onentry>
+			<dialog:say>Please specify ingredient name</dialog:say>	
+			<dialog:listen context="'default ingredients'"/>
+		</onentry>
+		<onevent name="sense.user.speak" cond="event?:sem:ingredient">
+			<var name="ingredient" type="Ingredient" value="availableIngredients.get(asInteger(event:sem:ingredient))" />
+			<exec>fridge.addIngredient(ingredient)</exec>
+			<dialog:say>Thanks, added <expr>ingredient.getName()</expr>.</dialog:say>
+			<random>
+				<dialog:say>Do you want to add more ingredients?</dialog:say>
+				<dialog:say>Anything else?</dialog:say>
+			</random>
+			<dialog:listen />
+		</onevent>
+		<onevent name="sense.user.speak" cond="event?:sem:yes">
+			<reentry/>
+		</onevent>
+		<onevent name="sense.user.speak" cond="event?:sem:no">
+			<goto state="Start" />
+		</onevent>
+		<onevent name="sense.user.speak sense.user.silence">
+			<dialog:say>Why so quiet? Dear...</dialog:say>
+			<reentry/>
+		</onevent>
+	</state>
+	
+	<state id="Suggestion">
+		<onentry>
+			<exec>availableRecipes = fridge.intersect(cookBook)</exec>
+			<if cond="!availableRecipes.isEmpty()">
+				<dialog:say>You can cook the following recipes: <expr>Recipe.concat(availableRecipes)</expr></dialog:say>
+				<dialog:say>Do you want to cook any of these recipes?</dialog:say>
+				<dialog:listen context="'default recipes'" />
+			<else />
+				<random>
+					<dialog:say>You can't cook anything. Please call your personal shopper.</dialog:say>
+					<dialog:say>You can't cook anything. Do you want me to call the nearest restuarant? SPONSORED BY: Ikea</dialog:say>
+					<goto state="Start" />
+				</random>
+			</if>
 		</onentry>
 		<onevent name="sense.user.speak">
-			<if cond="asInteger(event:sem:cook)==1">
-				<dialog:say>Okay.</dialog:say>
-				<goto state="Cook"/>
+			<if cond="event?:sem:recipe">
+				<if cond="fridge.canCook(cookBook.lookup(event:sem:recipe)).isEmpty()">
+					<exec>fridge.consume(cookBook.lookup(event:sem:recipe))</exec>
+					<dialog:say>Okay. Enjoy your meal.</dialog:say>
+					<goto state="Start"/>
+				<else/>
+					<dialog:say>Please choose available recipe.</dialog:say>
+					<reentry/>
+				</if>
+			<elseif cond="event?:sem:no"/> 
+				<dialog:say>That's too bad.</dialog:say>
+				<goto state="Start"/>
 			<else/>
-				<dialog:say>That was too low, let's try again.</dialog:say>
+				<dialog:say>I didn't get that. Please repeat.</dialog:say>
 				<reentry/>
 			</if>
 		</onevent>
@@ -56,10 +126,14 @@
 	
 	<state id="CheckIngredients">
 		<onentry>
-			<if cond="fridge.canCook(recipe).isEmpty()">
+			<exec>missingIngredients = fridge.canCook(recipe)</exec>
+			<if cond="missingIngredients.isEmpty()">
 				<dialog:say>You can cook this recipe: <expr>recipe.getName()</expr></dialog:say>
 			<else/>
-				<dialog:say>No banana, janne, you cannot cook this recipe: <expr>recipe.getName()</expr></dialog:say>
+				<dialog:say>You are missing the following ingredients: <expr>Ingredient.concat(missingIngredients)</expr>.</dialog:say>
+				<random>
+					<dialog:say>Time to go shopping!</dialog:say>
+				</random>
 			</if>
 		</onentry>
 	</state>

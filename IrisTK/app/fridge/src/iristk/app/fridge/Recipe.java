@@ -9,9 +9,6 @@ public class Recipe {
 	private String name;
 	
 	public Recipe(String name, List<Ingredient> ingredients) {
-		System.out.println("i1=" + ingredients);
-		System.out.println("Recipe constructor: " + name);
-		System.out.println("Recipe constructor: " + ingredients.size());
 		this.name = name;
 		this.ingredients = new ArrayList<Ingredient>(ingredients);
 	}
@@ -22,5 +19,14 @@ public class Recipe {
 
 	public List<Ingredient> getIngredients() {
 		return ingredients;
+	}
+	
+	public static String concat(List<Recipe> recipes) {
+		StringBuilder sb = new StringBuilder();
+
+		for (Recipe r : recipes)
+			sb.append(r.getName()).append(", ");
+
+		return sb.toString();
 	}
 }

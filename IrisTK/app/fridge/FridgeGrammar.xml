@@ -12,6 +12,37 @@
 				</one-of>
 				<tag>out.cook=1</tag>
 			</item>
+			<item>
+				<one-of>
+					<item>What can I cook</item>
+					<item>Show me what I can cook</item>
+					<item>Hit me with your best recipe</item>
+				</one-of>
+				<tag>out.suggest=1</tag>
+			</item>
+			<item>
+				<one-of>
+					<item>I have done some shopping</item>
+					<item>I want to add some wares</item>
+					<item>Enter ingredient mode</item>
+				</one-of>
+				<tag>out.groceries=1</tag>
+			</item>
+			<item>
+				<one-of>
+					<item>No</item>
+					<item>No, thanks</item>
+				</one-of>
+				<tag>out.no=1</tag>
+			</item>
+			<item>
+				<one-of>
+					<item>Yes</item>
+					<item>Yes, please</item>
+					<item>Yeah</item>
+				</one-of>
+				<tag>out.yes=1</tag>
+			</item>
 		</one-of>
 	</rule>
 </grammar>

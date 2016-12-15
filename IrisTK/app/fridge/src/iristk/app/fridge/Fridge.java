@@ -9,11 +9,8 @@ public class Fridge {
 	Map<String, Ingredient> ingredients = new HashMap<String, Ingredient>();
 
 	public List<Ingredient> canCook(Recipe r) {
-		System.out.println("canCook: " + r.getName());
-		System.out.println("canCook: " + r.getIngredients().size());
 		List<Ingredient> missing = new ArrayList<Ingredient>();
 		for (Ingredient i : r.getIngredients()) {
-			System.out.println("canCook: ingredient=" + i.getName());
 			Ingredient inFridge = ingredients.get(i.getName());
 			if (inFridge == null)
 				missing.add(i);
@@ -36,12 +33,20 @@ public class Fridge {
 		return this;
 	}
 
+	public Fridge addIngredient(Ingredient ingredient) {
+		List<Ingredient> ingredients = new ArrayList<Ingredient>();
+
+		ingredients.add(ingredient);
+
+		return addIngredients(ingredients);
+	}
+
 	public Map<String, Ingredient> getIngredients() {
 		return ingredients;
 	}
 	
 	public boolean consume(Recipe r) {
-		if(canCook(r).size() != 0) 
+		if(!canCook(r).isEmpty()) 
 			return false;
 
 		for (Ingredient i : r.getIngredients()) {
@@ -52,6 +57,16 @@ public class Fridge {
 		}
 
 		return true;
+	}
+	
+	public List<Recipe> intersect(List<Recipe> recipes) {
+		List<Recipe> availableRecipes = new ArrayList<Recipe>();
+
+		for (Recipe r : recipes) 
+			if (canCook(r).isEmpty())
+				availableRecipes.add(r);
+
+		return availableRecipes;
 	}
 
 	public static Fridge factory() {

@@ -22,9 +22,6 @@ public class CookBook extends ArrayList<Recipe> {
 		if (o == null || !(o instanceof String))
 			return null;
 
-		System.out.println("CookBook::lookup: " + o.toString());
-		System.out.println("CookBook::lookup: " + get(Integer.parseInt(o.toString())).getIngredients().size());
-
 		return get(Integer.parseInt(o.toString()));
 	}
 
@@ -38,7 +35,6 @@ public class CookBook extends ArrayList<Recipe> {
 		i1.add(new Ingredient("Toast", 1, Unit.ENUMERABLE));
 		i1.add(new Ingredient("Cheese", 1, Unit.ENUMERABLE));
 		i1.add(new Ingredient("Tomato", 1, Unit.ENUMERABLE));
-		System.out.println("i1=" + i1);
 		cb.add(new Recipe("Toast", i1));
 
 		List<Ingredient> i2 = new ArrayList<Ingredient>();
